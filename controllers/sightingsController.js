@@ -58,9 +58,9 @@ class SightingsController extends BaseController {
     try {
       const comments = await this.commentModel.findAll({
         where: {
-          sighting_id: sightingId,
+          sightingId: sightingId,
         },
-        attributes: ["id", "content", "sighting_id", "createdAt", "updatedAt"],
+        // attributes: ["id", "content", "sighting_id", "createdAt", "updatedAt"],
       });
       return res.json(comments);
     } catch (err) {
@@ -70,19 +70,18 @@ class SightingsController extends BaseController {
 
   async addComment(req, res) {
     const { sightingId } = req.params;
-
     const { content } = req.body;
+    console.log("params:", req.params);
+    console.log("content:", req.body);
     try {
       const newComment = await this.commentModel.create(
         {
-          updated_at: new Date(),
-          created_at: new Date(),
           content: content,
-          sighting_id: sightingId,
-        },
-        {
-          returning: ["id", "content", "sighting_id", "createdAt", "updatedAt"],
+          sightingId: sightingId,
         }
+        // {
+        //   returning: ["id", "content", "sighting_id", "createdAt", "updatedAt"],
+        // }
       );
       return res.json(newComment);
     } catch (err) {
