@@ -27,6 +27,7 @@ class SightingsRouter {
       "/:sightingId/comments/",
       this.controller.deleteComment.bind(this.controller)
     );
+    router.post("/:sightingId", this.controller.addLike.bind(this.controller));
 
     return router;
   }
