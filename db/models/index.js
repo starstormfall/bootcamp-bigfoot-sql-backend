@@ -1,10 +1,10 @@
-'use strict';
-const fs = require('fs');
-const path = require('path');
-const Sequelize = require('sequelize');
+"use strict";
+const fs = require("fs");
+const path = require("path");
+const Sequelize = require("sequelize");
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV;
-const config = require('../../config/database')[env];
+const config = require("../../config/database")[env];
 const db = {};
 
 let sequelize;
@@ -38,7 +38,7 @@ Object.keys(db).forEach((modelName) => {
     db[modelName].associate(db);
   }
 });
-
+// db.sightings.belongsTo... can be added here too
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 

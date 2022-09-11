@@ -1,40 +1,70 @@
 const BaseController = require("./baseController");
+const sequelize = require("sequelize");
 
 class SightingsController extends BaseController {
-  constructor(model, commentModel, likeModel) {
+  constructor(model, commentModel, likeModel, categoryModel) {
     super(model);
     this.commentModel = commentModel;
     this.likeModel = likeModel;
+    this.categoryModel = categoryModel;
+  }
+
+  async getAll(req, res) {
+    try {
+      const output = await this.model.findAll({
+        include: [{ model: this.categoryModel, through: { attributes: [] } }],
+        order: sequelize.col("id"),
+      });
+      return res.json(output);
+    } catch (err) {
+      return res.status(400).json({ error: true, msg: err });
+    }
   }
 
   // Retrieve specific sighting
   async getOne(req, res) {
     const { sightingId } = req.params;
     try {
-      const sighting = await this.model.findByPk(sightingId);
-      const likes = await this.likeModel.findAll({
+      const sighting = await this.model.findByPk(sightingId, {
+        include: [{ model: this.categoryModel, through: { attributes: [] } }],
+      });
+      console.log(sighting.categories);
+      console.log(sighting);
+      const likes = await this.likeModel.findAndCountAll({
         where: {
           sightingId: sightingId,
         },
       });
-      const response = { sighting, likes: likes.length };
-      return res.json(response);
+      sighting.dataValues["likes"] = likes.count;
+
+      return res.json(sighting);
     } catch (err) {
       return res.status(400).json({ error: true, msg: err });
     }
   }
 
   async addOne(req, res) {
-    const { date, location, notes } = req.body;
+    console.log(req.body);
+    const { date, location, notes, city, country, categoryIds } = req.body;
+
     try {
-      const newEntry = await this.model.create({
-        updated_at: new Date(),
-        created_at: new Date(),
+      const newSighting = await this.model.create({
         date: date,
-        location: location,
+        locationdescription: location,
         notes: notes,
+        city: city,
+        country: country,
       });
-      return res.json(newEntry);
+
+      const selectedCategories = await this.categoryModel.findAll({
+        where: {
+          id: categoryIds,
+        },
+      });
+
+      await newSighting.setCategories(selectedCategories);
+      console.log("new entry:", newSighting);
+      return res.json(newSighting);
     } catch (err) {
       return res.status(400).json({ error: true, msg: err });
     }
